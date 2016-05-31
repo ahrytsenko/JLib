@@ -1,1 +1,27 @@
+Class shoud implements basic math operations with long integer numbers.
+"Long integer numbers" here means integer with amount of digits more than 16 (Java Long type operates with integer 19 digits long).
+Main input in to and output out from class should be implemented with String type.
+Internside implementation should accept class values as well.
 
+"Basic math operations" here means:
+1/ addition 
+2/ substraction
+3/ multiplication
+4/ calculation of distance between
+
+Class should support sign mark. So class should properly operates with signed integers.
+
+Class name "MathLong".
+
+1/ addition 
+MathLong.add(MathLong value)
+Method operates with two instances. Value of instance "value" 
+
+2/ substraction
+MathLong.sub(MathLong value)
+
+3/ multiplication
+MathLong.mul(MathLong value)
+
+4/ calculation of distance between
+MathLong.dis(MathLong value)
