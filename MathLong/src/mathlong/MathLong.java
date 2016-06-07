@@ -1,30 +1,55 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package mathlong;
 
-import java.util.*;
-
 /**
- *
+ * Class implements basic math operations with large integers (where number of digits more than 19).
+ * Class provides such basic operations:
+ * - addition
+ * - multiplication
+ * - distance
+ * Integer should be unsigned
  * @author Andrii Grytsenko (ahrytsenko@gmail.com)
  */
 public class MathLong {
     
-    public final String EX_ILLEGAL_ARGUMENT_EXCEPTION = "Given string is not an integer value.";
+    /**
+     * Exception generated in case given string is not a valid integer value
+     */
+    public static final String EX_ILLEGAL_ARGUMENT_EXCEPTION = "Given string is not an integer value.";
     
-    private final int UNIT_LENGTH = 16;
-    private final long UNIT_VALUE = (long)Math.pow(10, UNIT_LENGTH);
+    /**
+     * Size of calculation unit treated as long for computations
+     * @see UNIT_VALUE
+     */
+    private static final int UNIT_LENGTH = 16;
     
-    private int longIntegerLength;
-    private int longIntegerLengthInUnits;
+    /**
+     * Value of calculation unit by radix 10
+     * @see UNIT_LENGTH
+     */
+    private static final long UNIT_VALUE = (long)Math.pow(10, UNIT_LENGTH);
+    
+    /**
+     * Sequence of characters where each of them is a digit
+     */
     private final StringBuilder longIntegerValue = new StringBuilder();
 
     /**
+     * Constructor. Creates instance and put value given as integer of type MathLong
+     * @param value initial value given as integer of type MathLong
+     * @see MathLong(long value)
+     * @see MathLong(String value)
+     * @see MathLong()
+     */
+    public MathLong(MathLong value) {
+        setValue(value.toString());
+    }
+    
+    /**
      * Constructor. Creates instance and put value given as integer of type long
-     * @param value - initial value given as integer of type long
+     * @param value initial value given as integer of type long
+     * @see MathLong(MathLong value)
+     * @see MathLong(String value)
+     * @see MathLong()
      */
     public MathLong(long value) {
         setValue(value);
@@ -32,7 +57,10 @@ public class MathLong {
     
     /**
      * Constructor. Creates instance and put value given as integer of type String
-     * @param value - initial value given as integer of type String
+     * @param value initial value given as integer of type String
+     * @see MathLong(MathLong value)
+     * @see MathLong(long value)
+     * @see MathLong()
      */
     public MathLong(String value) {
         setValue(value);
@@ -40,6 +68,9 @@ public class MathLong {
     
     /**
      * Constructor. Creates instance and put value 0 as initial value
+     * @see MathLong(MathLong value)
+     * @see MathLong(String value)
+     * @see MathLong(long value)
      */
     public MathLong() {
         this(0);
@@ -48,16 +79,31 @@ public class MathLong {
     /**
      * Adds given value to its value. Result is store in current instance.
      * Given instance is not change.
-     * @param value - value to add
-     * @return - instance with result of addition
+     * @param value value to add
+     * @return instance with result of addition
+     * @see MathLong add(MathLong value)
+     */
+    public MathLong add(String value) { return add(new MathLong(value)); }
+    
+    /**
+     * Adds given value to its value. Result is store in current instance.
+     * Given instance is not change.
+     * @param value value to add
+     * @return instance with result of addition
+     * @see MathLong add(String value)
      */
     public MathLong add(MathLong value) {
-        long extraValue = 0;
-        long addition;
+        int calculatedUnits = calcMaximumUnits(value);
+        expand(calculatedUnits * UNIT_LENGTH);
+        value.expand(calculatedUnits * UNIT_LENGTH);
         
-        for (int i = longIntegerValue.length()-1; i >=0; i--) {
-
-            addition = longIntegerValue.get(i) + value.longIntegerValue.get(i) + extraValue;
+        long addition, extraValue = 0;
+        
+        for (int i = calcUnits(longIntegerValue.length()); i > 0; i--) {
+            
+            addition = Long.parseLong(longIntegerValue.substring((i-1)*UNIT_LENGTH, i*UNIT_LENGTH)) + 
+                       Long.parseLong(value.longIntegerValue.substring((i-1)*UNIT_LENGTH, i*UNIT_LENGTH)) + 
+                       extraValue;
 
             if (addition >= UNIT_VALUE) {
                 extraValue = addition / UNIT_VALUE;
@@ -66,37 +112,84 @@ public class MathLong {
             else {
                 extraValue = 0;
             }
-            longIntegerValue.set(i, addition);
+            
+            longIntegerValue.delete((i-1)*UNIT_LENGTH, i*UNIT_LENGTH);
+            longIntegerValue.insert((i-1)*UNIT_LENGTH, expand(Long.toString(addition), UNIT_LENGTH));
         }
         
+        if (extraValue != 0) {
+            longIntegerValue.insert(0, Long.toString(extraValue));
+        }
+        
+        shrink();
         return this;
     }
+    
+    public MathLong mul(String value) { return mul(new MathLong(value)); }
     
     /**
      * Multiplies given value to its value. Result is store in current instance.
      * Given instance is not change.
-     * @param value - value to multiply
-     * @return - instance with result of multiplication
+     * AB * CD = (10*A + B) * (10*C + D) = 10*10*A*C + 10*(A*D + B*C) + B*D
+     * 
+     * @param value value to multiply
+     * @return instance with result of multiplication
      */
     public MathLong mul(MathLong value) {
+        int calculatedUnits = calcMaximumUnits(value);
+        expand(calculatedUnits * UNIT_LENGTH);
+        value.expand(calculatedUnits * UNIT_LENGTH);
+        
+        if (calculatedUnits == 1) {
+            setValue(new MathLong(Long.parseLong(longIntegerValue.substring(0, UNIT_LENGTH/2))*
+                                  Long.parseLong(value.longIntegerValue.substring(0, UNIT_LENGTH/2)))
+                    .pow(UNIT_LENGTH)
+                    .add(new MathLong(Long.parseLong(longIntegerValue.substring(UNIT_LENGTH/2, UNIT_LENGTH))*
+                                      Long.parseLong(value.longIntegerValue.substring(0, UNIT_LENGTH/2)))
+                        .add(new MathLong(Long.parseLong(longIntegerValue.substring(0, UNIT_LENGTH/2))*
+                                          Long.parseLong(value.longIntegerValue.substring(UNIT_LENGTH/2, UNIT_LENGTH))))
+                        .pow(UNIT_LENGTH/2))
+                    .add(new MathLong(Long.parseLong(longIntegerValue.substring(UNIT_LENGTH/2, UNIT_LENGTH))*
+                                      Long.parseLong(value.longIntegerValue.substring(UNIT_LENGTH/2, UNIT_LENGTH))))
+                    .toString());
+        }
+        else {
+            setValue(new MathLong(longIntegerValue.substring(0, longIntegerValue.length()/2))
+                    .mul(new MathLong(value.longIntegerValue.substring(0, value.longIntegerValue.length()/2)))
+                    .pow(calculatedUnits*UNIT_LENGTH)
+                    .add(new MathLong(longIntegerValue.substring(0, longIntegerValue.length()/2))
+                        .mul(new MathLong(value.longIntegerValue.substring(value.longIntegerValue.length()/2, value.longIntegerValue.length())))
+                        .add(new MathLong(longIntegerValue.substring(longIntegerValue.length()/2, longIntegerValue.length()))
+                            .mul(new MathLong(value.longIntegerValue.substring(0, value.longIntegerValue.length()/2))))
+                        .pow(calculatedUnits*UNIT_LENGTH/2))
+                    .add(new MathLong(longIntegerValue.substring(longIntegerValue.length()/2, longIntegerValue.length()))
+                        .mul(new MathLong(value.longIntegerValue.substring(value.longIntegerValue.length()/2, value.longIntegerValue.length()))))
+                    .toString());
+        }
+        
+        shrink();
         return this;
     }
+    
+    public MathLong sub(String value) { return sub(new MathLong(value)); }
     
     /**
      * Subtracts given value to its value. Result is store in current instance.
      * Given instance is not change.
-     * @param value - value to subtract
-     * @return - instance with result of subtraction
+     * @param value value to subtract
+     * @return instance with result of subtraction
      */
     public MathLong sub(MathLong value) {
         return this;
     }
     
+    public MathLong dis(String value) { return dis(new MathLong(value)); }
+    
     /**
      * Calculates a distance between given value and its value. Result is store in current instance.
      * Given instance is not change.
-     * @param value - value to calculate a distance to
-     * @return - instance with distance value
+     * @param value value to calculate a distance to
+     * @return instance with distance value
      */
     public MathLong dis(MathLong value) {
         return this;
@@ -111,55 +204,30 @@ public class MathLong {
         return longIntegerValue.toString();
     }
     
-    /**
-     * Represents value as String (sequence of characters where each of them is a digit)
-     * Sequence is expanded up to full units by leading zeros.
-     * @return integer value represented as String 
-     */
-    public String toExpandedString() {
-        return expand(longIntegerValue.toString(), longIntegerLengthInUnits*UNIT_LENGTH);
-    }
-    
-//    public String getValue() { return longIntegerValue; }
     public final void setValue(String value) { 
         StringBuilder validatedString = new StringBuilder(validateLongInteger(value));
         
-        /*
-        if (validatedString.charAt(0) == '-') {
-            negativeValue = true;
-            validatedString = validatedString.substring(1);
-        }
-        else negativeValue = false;
-        */
-        
-        longIntegerLength = validatedString.length();
-        longIntegerLengthInUnits = calculateUnits(longIntegerLength);
-        
-        validatedString = expand(validatedString, longIntegerLengthInUnits*UNIT_LENGTH);
-        
         longIntegerValue.delete(0, longIntegerValue.length());
-        
-        for (int i = 0; i < longIntegerLengthInUnits; i++) {
-            longIntegerValue.append(Long.parseLong(validatedString.substring(i*UNIT_LENGTH, i*UNIT_LENGTH+UNIT_LENGTH)));
-        }
+        longIntegerValue.append(validatedString);
+        shrink();
     }
     
     public final void setValue(long value) { setValue(Long.toString(value)); }
+    public final void setValue(MathLong value) { setValue(value.toString()); }
     
     /**
      * Validates given String value if it is a valid integer
-     * @param value - is given String represents integer value
+     * @param value is given String represents integer value
      * @return String - validated integer value
      * @throws IllegalArgumentException if given value is not integer
      */
     private StringBuilder validateLongInteger(String value) {
+        
         value = value.trim();
         if (value.length() == 0) throw new IllegalArgumentException(EX_ILLEGAL_ARGUMENT_EXCEPTION);
         
         StringBuilder sb = new StringBuilder();
         
-        // Check each character if it is a digit.
-        //for (int i = startIndex; i < value.length(); i++)  {
         for (int i = 0; i < value.length(); i++)  {
             if (Character.isDigit(value.charAt(i))) {
                 sb.append(value.charAt(i));
@@ -170,17 +238,37 @@ public class MathLong {
         return sb;
     }
     
-    private int calculateUnits(int length) {
+    private MathLong pow(int power) {
+        for (int i = 0; i < power; i++)
+            longIntegerValue.append("0");
+        return this;
+    }
+    
+    private int calcUnits(int length) {
         int units = 1;
         while (units*UNIT_LENGTH < length) units *= 2;
         return units;
     }
-            
+
+    private int calcMaximumUnits(MathLong comparedValue) {
+        return Math.max(calcUnits(longIntegerValue.length()), calcUnits(comparedValue.longIntegerValue.length()));
+    }
+    
     /**
      * Expands integer value up to given length (i.e. number of digits) by adding leading zero(s)
      * if argument length is greater than current length of integer value.
-     * @param length - given target length
-     * @return expanded string (integer value)
+     * @param length given target length
+     */
+    private void expand(int length) {
+        while (longIntegerValue.length() < length)
+            longIntegerValue.insert(0, "0");
+    }
+
+    /**
+     * Expands integer value (given as String) up to given length (i.e. number of digits) by adding leading zero(s)
+     * if argument length is greater than current length of integer value.
+     * @param length given target length
+     * @return expanded string
      */
     private String expand(String value, int length) {
         StringBuilder sb = new StringBuilder();
@@ -191,45 +279,20 @@ public class MathLong {
         return sb.toString();
     }
     
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-        
-        /*
-        System.out.println("Long.toString(Long.MAX_VALUE)           = " + Long.toString(Long.MAX_VALUE));
-        System.out.println("Long.toUnsignedString(Long.MAX_VALUE)   = " + Long.toUnsignedString(Long.MAX_VALUE));
-        System.out.println("Long.toString(Long.MIN_VALUE)           = " + Long.toString(Long.MIN_VALUE));
-        System.out.println("Long.toUnsignedString(Long.MIN_VALUE)   = " + Long.toUnsignedString(Long.MIN_VALUE));
-
-        System.out.println("Long.toString(Long.MAX_VALUE+1)         = " + Long.toString(Long.MAX_VALUE+1));
-        System.out.println("Long.toUnsignedString(Long.MAX_VALUE+1) = " + Long.toUnsignedString(Long.MAX_VALUE+1));
-        System.out.println("Long.toString(Long.MIN_VALUE-1)         = " + Long.toString(Long.MIN_VALUE-1));
-        System.out.println("Long.toUnsignedString(Long.MIN_VALUE-1) = " + Long.toUnsignedString(Long.MIN_VALUE-1));
-        
-        System.out.println("Long.toString(Long.MAX_VALUE/2)         = " + Long.toString(Long.MAX_VALUE/2));
-        System.out.println("Long.toUnsignedString(Long.MAX_VALUE/2) = " + Long.toUnsignedString(Long.MAX_VALUE/2));
-        System.out.println("Long.toString(Long.MIN_VALUE/2)         = " + Long.toString(Long.MIN_VALUE/2));
-        System.out.println("Long.toUnsignedString(Long.MIN_VALUE/2) = " + Long.toUnsignedString(Long.MIN_VALUE/2));
-        */
-
-        MathLong ml1 = new MathLong("123145678901234567890123456789012345678901234567890123456789");
-        MathLong ml2 = new MathLong("987654321098765432109876543210987654321098765432109876543210");
-        System.out.println(" "+ml1);
-        System.out.println(" "+ml2);
-        System.out.println(ml1.add(ml2));
-        /*
-        System.out.println((new MathLong("   11111111122222222223333333333444444444455555555555  ")));
-        System.out.println((new MathLong("   11111111122222222223333333333444444444455555555555  ")));
-        System.out.println((new MathLong("   11111111122222222223333333333444444444455555555555  ")));
-        System.out.println((new MathLong("81276478236478691236412364234691278649123498812379647862138428")));
-        System.out.println((new MathLong("-9812378912738912793712897389712897389712389")));
-        System.out.println((new MathLong("+82134789327471230897489127398478901723897040929")));
-        */
-        
-        //System.out.println((new MathLong("018237489231704918237094871293hg")).getValue());
-        System.out.println();
-        System.out.println();
+    private void shrink() {
+        int endIndex = -1;
+        boolean leadZero;
+        for (int i = 0; i < longIntegerValue.length()-1; i++) {
+            leadZero = longIntegerValue.charAt(i) == '0';
+            if (!leadZero) 
+                break;
+            else
+                endIndex = i;
+        }
+        if (endIndex != -1) {
+            longIntegerValue.delete(0, endIndex+1);
+        }
     }
+
     
 }
