@@ -112,7 +112,7 @@ public class MathLong {
             longIntegerValue.insert(0, Long.toString(extraValue));
         }
         
-        shrink();
+        shrink(); value.shrink();
         return this;
     }
     
@@ -173,7 +173,7 @@ public class MathLong {
                     .toString());
         }
         
-        shrink();
+        shrink(); value.shrink();
         return this;
     }
     
@@ -218,6 +218,57 @@ public class MathLong {
         for (int i = 0; i < power; i++)
             longIntegerValue.append("0");
         return this;
+    }
+    
+    /**
+     * Compares two large integer values. 
+     * If they are equal it returns 0. 
+     * If given value is less than instances value it returns -1. 
+     * If given value is less than instances value it returns 1. 
+     * @param value Large integer for comparing
+     * @return -1, 0 or 1
+     */
+    public int cmp(String value) { return cmp(new MathLong(value)); }
+    
+    /**
+     * Compares two large integer values. 
+     * If they are equal it returns 0. 
+     * If given value is less than instances value it returns -1. 
+     * If given value is less than instances value it returns 1. 
+     * @param value Large integer for comparing
+     * @return -1, 0 or 1
+     */
+    public int cmp(long value) { return cmp(new MathLong(value)); }
+    
+    /**
+     * Compares two large integer values. 
+     * If they are equal it returns 0. 
+     * If given value is less than instances value it returns -1. 
+     * If given value is less than instances value it returns 1. 
+     * @param value Large integer for comparing
+     * @return -1, 0 or 1
+     */
+    public int cmp(MathLong value) { 
+        int calculatedUnits = calcMaximumUnits(value);
+        expand(calculatedUnits * UNIT_LENGTH);
+        value.expand(calculatedUnits * UNIT_LENGTH);
+        
+        int result = 0;
+        if (longIntegerValue.equals(value.longIntegerValue)) return 0;
+        for (int i = 1; i <= calculatedUnits; i++)
+            if (Long.parseLong(longIntegerValue.substring((i-1)*UNIT_LENGTH, i*UNIT_LENGTH)) > 
+                Long.parseLong(value.longIntegerValue.substring((i-1)*UNIT_LENGTH, i*UNIT_LENGTH))) {
+                result = 1;
+                break;
+            }
+            else if (Long.parseLong(longIntegerValue.substring((i-1)*UNIT_LENGTH, i*UNIT_LENGTH)) < 
+                     Long.parseLong(value.longIntegerValue.substring((i-1)*UNIT_LENGTH, i*UNIT_LENGTH))) {
+                result = -1;
+                break;
+            }
+
+        shrink(); value.shrink();
+        return result;
     }
     
     /**
