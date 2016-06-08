@@ -23,7 +23,7 @@ public class MathLong {
     private static final int UNIT_LENGTH = 16;
     
     /**
-     * Value of calculation unit by radix 10
+     * Value of a calculation unit by radix 10
      * @see UNIT_LENGTH
      */
     private static final long UNIT_VALUE = (long)Math.pow(10, UNIT_LENGTH);
@@ -34,7 +34,7 @@ public class MathLong {
     private final StringBuilder longIntegerValue = new StringBuilder();
 
     /**
-     * Constructor. Creates instance and put value given as integer of type MathLong
+     * Constructor. Creates an instance and puts value given as an integer of type MathLong
      * @param value initial value given as integer of type MathLong
      * @see MathLong(long value)
      * @see MathLong(String value)
@@ -45,7 +45,7 @@ public class MathLong {
     }
     
     /**
-     * Constructor. Creates instance and put value given as integer of type long
+     * Constructor. Creates an instance and puts value given as an integer of type long
      * @param value initial value given as integer of type long
      * @see MathLong(MathLong value)
      * @see MathLong(String value)
@@ -56,7 +56,7 @@ public class MathLong {
     }
     
     /**
-     * Constructor. Creates instance and put value given as integer of type String
+     * Constructor. Creates an instance and puts value given as an integer of type String
      * @param value initial value given as integer of type String
      * @see MathLong(MathLong value)
      * @see MathLong(long value)
@@ -67,7 +67,7 @@ public class MathLong {
     }
     
     /**
-     * Constructor. Creates instance and put value 0 as initial value
+     * Constructor. Creates an instance and puts value 0 as initial value
      * @see MathLong(MathLong value)
      * @see MathLong(String value)
      * @see MathLong(long value)
@@ -77,7 +77,7 @@ public class MathLong {
     }
 
     /**
-     * Adds given value to its value. Result is store in current instance.
+     * Adds given value to instances value. Result is store in instance.
      * Given instance is not change.
      * @param value value to add
      * @return instance with result of addition
@@ -86,7 +86,7 @@ public class MathLong {
     public MathLong add(String value) { return add(new MathLong(value)); }
     
     /**
-     * Adds given value to its value. Result is store in current instance.
+     * Adds given value to instances value. Result is store in instance.
      * Given instance is not change.
      * @param value value to add
      * @return instance with result of addition
@@ -125,15 +125,25 @@ public class MathLong {
         return this;
     }
     
+    /**
+     * Multiplies given value to instances value. Result is store in current instance.
+     * Given instance is not change.
+     * Multiplication of large integer computes by followed scheme:
+     * AB * CD = (10*A + B) * (10*C + D) = 10*10*A*C + 10*(A*D + B*C) + B*D
+     * @param value value to multiply
+     * @return instance with result of multiplication
+     * @see MathLong mul(MathLong value)
+     */
     public MathLong mul(String value) { return mul(new MathLong(value)); }
     
     /**
-     * Multiplies given value to its value. Result is store in current instance.
+     * Multiplies given value to instances value. Result is store in current instance.
      * Given instance is not change.
+     * Multiplication of large integer computes by followed scheme:
      * AB * CD = (10*A + B) * (10*C + D) = 10*10*A*C + 10*(A*D + B*C) + B*D
-     * 
      * @param value value to multiply
      * @return instance with result of multiplication
+     * @see MathLong mul(String value)
      */
     public MathLong mul(MathLong value) {
         int calculatedUnits = calcMaximumUnits(value);
@@ -171,39 +181,79 @@ public class MathLong {
         return this;
     }
     
-    public MathLong sub(String value) { return sub(new MathLong(value)); }
-    
     /**
-     * Subtracts given value to its value. Result is store in current instance.
+     * Subtracts given value to instances value. Result is store in current instance.
      * Given instance is not change.
      * @param value value to subtract
      * @return instance with result of subtraction
+     * @see MathLong sub(MathLong value)
+     */
+    public MathLong sub(String value) { return sub(new MathLong(value)); }
+    
+    /**
+     * Subtracts given value to instances value. Result is store in current instance.
+     * Given instance is not change.
+     * @param value value to subtract
+     * @return instance with result of subtraction
+     * @see MathLong sub(String value)
      */
     public MathLong sub(MathLong value) {
         return this;
     }
     
-    public MathLong dis(String value) { return dis(new MathLong(value)); }
-    
     /**
-     * Calculates a distance between given value and its value. Result is store in current instance.
+     * Calculates a distance between given value and instances value. Result is store in current instance.
      * Given instance is not change.
      * @param value value to calculate a distance to
      * @return instance with distance value
+     * @see MathLong dis(MathLong value)
+     */
+    public MathLong dis(String value) { return dis(new MathLong(value)); }
+    
+    /**
+     * Calculates a distance between given value and instances value. Result is store in current instance.
+     * Given instance is not change.
+     * @param value value to calculate a distance to
+     * @return instance with distance value
+     * @see MathLong dis(String value)
      */
     public MathLong dis(MathLong value) {
         return this;
     }
 
     /**
-     * Represents value as String (sequence of characters where each of them is a digit)
-     * @return integer value represented as String 
+     * Raises instances value to the given power
+     * @param power Power should be a positive integer
+     * @return Instance of MathLong contains raised value
      */
-    @Override
-    public String toString() {
-        return longIntegerValue.toString();
+    public MathLong pow(int power) {
+        for (int i = 0; i < power; i++)
+            longIntegerValue.append("0");
+        return this;
     }
     
+    /**
+     * Stores large integer given as a value of type long
+     * @param value large integer given as a value of type long
+     * @see setValue(MathLong value)
+     * @see setValue(String value)
+     */
+    public final void setValue(long value) { setValue(Long.toString(value)); }
+
+    /**
+     * Stores large integer given as a value of type MathLong
+     * @param value large integer given as a value of type MathLong
+     * @see setValue(long value)
+     * @see setValue(String value)
+     */
+    public final void setValue(MathLong value) { setValue(value.toString()); }
+    
+    /**
+     * Stores large integer given as a value of type String
+     * @param value large integer given as a value of type String
+     * @see setValue(long value)
+     * @see setValue(MathLong value)
+     */
     public final void setValue(String value) { 
         StringBuilder validatedString = new StringBuilder(validateLongInteger(value));
         
@@ -211,14 +261,20 @@ public class MathLong {
         longIntegerValue.append(validatedString);
         shrink();
     }
-    
-    public final void setValue(long value) { setValue(Long.toString(value)); }
-    public final void setValue(MathLong value) { setValue(value.toString()); }
-    
+
+    /**
+     * Represents value as a String (sequence of characters where each of them is a digit)
+     * @return integer value represented as a String 
+     */
+    @Override
+    public String toString() {
+        return longIntegerValue.toString();
+    }
+
     /**
      * Validates given String value if it is a valid integer
      * @param value is given String represents integer value
-     * @return String - validated integer value
+     * @return String validated integer value
      * @throws IllegalArgumentException if given value is not integer
      */
     private StringBuilder validateLongInteger(String value) {
@@ -238,24 +294,29 @@ public class MathLong {
         return sb;
     }
     
-    private MathLong pow(int power) {
-        for (int i = 0; i < power; i++)
-            longIntegerValue.append("0");
-        return this;
-    }
-    
+    /**
+     * Computes how many units will be need in order to operate 
+     * with large integer value of size <em>length</em> digits
+     * @param length Amount of digits of instances value
+     * @return Number of units
+     */
     private int calcUnits(int length) {
         int units = 1;
         while (units*UNIT_LENGTH < length) units *= 2;
         return units;
     }
 
+    /**
+     * Returns maximum of units of given comparedValue and instances value
+     * @param comparedValue
+     * @return 
+     */
     private int calcMaximumUnits(MathLong comparedValue) {
         return Math.max(calcUnits(longIntegerValue.length()), calcUnits(comparedValue.longIntegerValue.length()));
     }
     
     /**
-     * Expands integer value up to given length (i.e. number of digits) by adding leading zero(s)
+     * Expands instances value up to given length (i.e. number of digits) by adding leading zero(s)
      * if argument length is greater than current length of integer value.
      * @param length given target length
      */
@@ -279,6 +340,9 @@ public class MathLong {
         return sb.toString();
     }
     
+    /**
+     * Deletes leading zeroes from instances value
+     */
     private void shrink() {
         int endIndex = -1;
         boolean leadZero;
@@ -294,5 +358,4 @@ public class MathLong {
         }
     }
 
-    
 }
