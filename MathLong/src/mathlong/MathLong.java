@@ -3,8 +3,8 @@ package mathlong;
 /**
  * Class implements basic math operations with large integers (where number of digits more than 19).
  * Class provides such basic operations:
- * - addition
- * - multiplication
+ * - addition, 
+ * - multiplication, 
  * - distance
  * Integer should be unsigned
  * @author Andrii Grytsenko (ahrytsenko@gmail.com)
@@ -18,13 +18,11 @@ public class MathLong {
     
     /**
      * Size of calculation unit treated as long for computations
-     * @see UNIT_VALUE
      */
     private static final int UNIT_LENGTH = 16;
     
     /**
      * Value of a calculation unit by radix 10
-     * @see UNIT_LENGTH
      */
     private static final long UNIT_VALUE = (long)Math.pow(10, UNIT_LENGTH);
     
@@ -36,9 +34,6 @@ public class MathLong {
     /**
      * Constructor. Creates an instance and puts value given as an integer of type MathLong
      * @param value initial value given as integer of type MathLong
-     * @see MathLong(long value)
-     * @see MathLong(String value)
-     * @see MathLong()
      */
     public MathLong(MathLong value) {
         setValue(value.toString());
@@ -47,9 +42,6 @@ public class MathLong {
     /**
      * Constructor. Creates an instance and puts value given as an integer of type long
      * @param value initial value given as integer of type long
-     * @see MathLong(MathLong value)
-     * @see MathLong(String value)
-     * @see MathLong()
      */
     public MathLong(long value) {
         setValue(value);
@@ -58,9 +50,6 @@ public class MathLong {
     /**
      * Constructor. Creates an instance and puts value given as an integer of type String
      * @param value initial value given as integer of type String
-     * @see MathLong(MathLong value)
-     * @see MathLong(long value)
-     * @see MathLong()
      */
     public MathLong(String value) {
         setValue(value);
@@ -68,9 +57,6 @@ public class MathLong {
     
     /**
      * Constructor. Creates an instance and puts value 0 as initial value
-     * @see MathLong(MathLong value)
-     * @see MathLong(String value)
-     * @see MathLong(long value)
      */
     public MathLong() {
         this(0);
@@ -78,10 +64,16 @@ public class MathLong {
 
     /**
      * Adds given value to instances value. Result is store in instance.
+     * @param value value to add
+     * @return instance with result of addition
+     */
+    public MathLong add(long value) { return add(new MathLong(value)); }
+    
+    /**
+     * Adds given value to instances value. Result is store in instance.
      * Given instance is not change.
      * @param value value to add
      * @return instance with result of addition
-     * @see MathLong add(MathLong value)
      */
     public MathLong add(String value) { return add(new MathLong(value)); }
     
@@ -90,7 +82,6 @@ public class MathLong {
      * Given instance is not change.
      * @param value value to add
      * @return instance with result of addition
-     * @see MathLong add(String value)
      */
     public MathLong add(MathLong value) {
         int calculatedUnits = calcMaximumUnits(value);
@@ -127,23 +118,28 @@ public class MathLong {
     
     /**
      * Multiplies given value to instances value. Result is store in current instance.
-     * Given instance is not change.
      * Multiplication of large integer computes by followed scheme:
      * AB * CD = (10*A + B) * (10*C + D) = 10*10*A*C + 10*(A*D + B*C) + B*D
      * @param value value to multiply
      * @return instance with result of multiplication
-     * @see MathLong mul(MathLong value)
      */
     public MathLong mul(String value) { return mul(new MathLong(value)); }
     
     /**
      * Multiplies given value to instances value. Result is store in current instance.
-     * Given instance is not change.
      * Multiplication of large integer computes by followed scheme:
      * AB * CD = (10*A + B) * (10*C + D) = 10*10*A*C + 10*(A*D + B*C) + B*D
      * @param value value to multiply
      * @return instance with result of multiplication
-     * @see MathLong mul(String value)
+     */
+    public MathLong mul(long value) { return mul(new MathLong(value)); }
+    
+    /**
+     * Multiplies given value to instances value. Result is store in current instance.
+     * Multiplication of large integer computes by followed scheme:
+     * AB * CD = (10*A + B) * (10*C + D) = 10*10*A*C + 10*(A*D + B*C) + B*D
+     * @param value value to multiply
+     * @return instance with result of multiplication
      */
     public MathLong mul(MathLong value) {
         int calculatedUnits = calcMaximumUnits(value);
@@ -183,19 +179,15 @@ public class MathLong {
     
     /**
      * Subtracts given value to instances value. Result is store in current instance.
-     * Given instance is not change.
      * @param value value to subtract
      * @return instance with result of subtraction
-     * @see MathLong sub(MathLong value)
      */
     public MathLong sub(String value) { return sub(new MathLong(value)); }
     
     /**
      * Subtracts given value to instances value. Result is store in current instance.
-     * Given instance is not change.
      * @param value value to subtract
      * @return instance with result of subtraction
-     * @see MathLong sub(String value)
      */
     public MathLong sub(MathLong value) {
         return this;
@@ -203,19 +195,15 @@ public class MathLong {
     
     /**
      * Calculates a distance between given value and instances value. Result is store in current instance.
-     * Given instance is not change.
      * @param value value to calculate a distance to
      * @return instance with distance value
-     * @see MathLong dis(MathLong value)
      */
     public MathLong dis(String value) { return dis(new MathLong(value)); }
     
     /**
      * Calculates a distance between given value and instances value. Result is store in current instance.
-     * Given instance is not change.
      * @param value value to calculate a distance to
      * @return instance with distance value
-     * @see MathLong dis(String value)
      */
     public MathLong dis(MathLong value) {
         return this;
@@ -233,26 +221,47 @@ public class MathLong {
     }
     
     /**
+     * Tests instance value and given value if they are equal
+     * @param value Value for comparing
+     * @return returns true if values are equal and false otherwise
+     */
+    public boolean equals(String value) {
+        return longIntegerValue.toString().equals((new MathLong(value)).toString());
+    }
+    
+    /**
+     * Tests instance value and given value if they are equal
+     * @param value Value for comparing
+     * @return returns true if values are equal and false otherwise
+     */
+    public boolean equals(long value) {
+        return longIntegerValue.toString().equals((new MathLong(value)).toString());
+    }
+    
+    /**
+     * Tests instance value and given value if they are equal
+     * @param value Value for comparing
+     * @return returns true if values are equal and false otherwise
+     */
+    public boolean equals(MathLong value) {
+        return longIntegerValue.toString().equals(value.toString());
+    }
+    
+    /**
      * Stores large integer given as a value of type long
      * @param value large integer given as a value of type long
-     * @see setValue(MathLong value)
-     * @see setValue(String value)
      */
     public final void setValue(long value) { setValue(Long.toString(value)); }
 
     /**
      * Stores large integer given as a value of type MathLong
      * @param value large integer given as a value of type MathLong
-     * @see setValue(long value)
-     * @see setValue(String value)
      */
     public final void setValue(MathLong value) { setValue(value.toString()); }
     
     /**
      * Stores large integer given as a value of type String
      * @param value large integer given as a value of type String
-     * @see setValue(long value)
-     * @see setValue(MathLong value)
      */
     public final void setValue(String value) { 
         StringBuilder validatedString = new StringBuilder(validateLongInteger(value));
@@ -309,7 +318,7 @@ public class MathLong {
     /**
      * Returns maximum of units of given comparedValue and instances value
      * @param comparedValue
-     * @return 
+     * @return maximum of units
      */
     private int calcMaximumUnits(MathLong comparedValue) {
         return Math.max(calcUnits(longIntegerValue.length()), calcUnits(comparedValue.longIntegerValue.length()));
