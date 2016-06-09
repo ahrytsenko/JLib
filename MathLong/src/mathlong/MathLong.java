@@ -63,14 +63,14 @@ public class MathLong {
     }
 
     /**
-     * Adds given value to instances value. Result is store in instance.
+     * Adds given value to instances value.
      * @param value value to add
      * @return instance with result of addition
      */
     public MathLong add(long value) { return add(new MathLong(value)); }
     
     /**
-     * Adds given value to instances value. Result is store in instance.
+     * Adds given value to instances value.
      * Given instance is not change.
      * @param value value to add
      * @return instance with result of addition
@@ -78,22 +78,25 @@ public class MathLong {
     public MathLong add(String value) { return add(new MathLong(value)); }
     
     /**
-     * Adds given value to instances value. Result is store in instance.
+     * Adds given value to instances value.
      * Given instance is not change.
      * @param value value to add
      * @return instance with result of addition
      */
     public MathLong add(MathLong value) {
         int calculatedUnits = calcMaximumUnits(value);
-        expand(calculatedUnits * UNIT_LENGTH);
-        value.expand(calculatedUnits * UNIT_LENGTH);
+        MathLong add_one = new MathLong(this);
+        MathLong add_two = new MathLong(value);
+        
+        add_one.expand(calculatedUnits * UNIT_LENGTH);
+        add_two.expand(calculatedUnits * UNIT_LENGTH);
         
         long addition, extraValue = 0;
         
-        for (int i = calcUnits(longIntegerValue.length()); i > 0; i--) {
+        for (int i = calcUnits(add_one.longIntegerValue.length()); i > 0; i--) {
             
-            addition = Long.parseLong(longIntegerValue.substring((i-1)*UNIT_LENGTH, i*UNIT_LENGTH)) + 
-                       Long.parseLong(value.longIntegerValue.substring((i-1)*UNIT_LENGTH, i*UNIT_LENGTH)) + 
+            addition = Long.parseLong(add_one.longIntegerValue.substring((i-1)*UNIT_LENGTH, i*UNIT_LENGTH)) + 
+                       Long.parseLong(add_two.longIntegerValue.substring((i-1)*UNIT_LENGTH, i*UNIT_LENGTH)) + 
                        extraValue;
 
             if (addition >= UNIT_VALUE) {
@@ -104,20 +107,20 @@ public class MathLong {
                 extraValue = 0;
             }
             
-            longIntegerValue.delete((i-1)*UNIT_LENGTH, i*UNIT_LENGTH);
-            longIntegerValue.insert((i-1)*UNIT_LENGTH, expand(Long.toString(addition), UNIT_LENGTH));
+            add_one.longIntegerValue.delete((i-1)*UNIT_LENGTH, i*UNIT_LENGTH);
+            add_one.longIntegerValue.insert((i-1)*UNIT_LENGTH, expand(Long.toString(addition), UNIT_LENGTH));
         }
         
         if (extraValue != 0) {
-            longIntegerValue.insert(0, Long.toString(extraValue));
+            add_one.longIntegerValue.insert(0, Long.toString(extraValue));
         }
         
-        shrink(); value.shrink();
-        return this;
+        add_one.shrink();
+        return add_one;
     }
     
     /**
-     * Multiplies given value to instances value. Result is store in current instance.
+     * Multiplies given value to instances value.
      * Multiplication of large integer computes by followed scheme:
      * AB * CD = (10*A + B) * (10*C + D) = 10*10*A*C + 10*(A*D + B*C) + B*D
      * @param value value to multiply
@@ -126,7 +129,7 @@ public class MathLong {
     public MathLong mul(String value) { return mul(new MathLong(value)); }
     
     /**
-     * Multiplies given value to instances value. Result is store in current instance.
+     * Multiplies given value to instances value.
      * Multiplication of large integer computes by followed scheme:
      * AB * CD = (10*A + B) * (10*C + D) = 10*10*A*C + 10*(A*D + B*C) + B*D
      * @param value value to multiply
@@ -135,7 +138,7 @@ public class MathLong {
     public MathLong mul(long value) { return mul(new MathLong(value)); }
     
     /**
-     * Multiplies given value to instances value. Result is store in current instance.
+     * Multiplies given value to instances value.
      * Multiplication of large integer computes by followed scheme:
      * AB * CD = (10*A + B) * (10*C + D) = 10*10*A*C + 10*(A*D + B*C) + B*D
      * @param value value to multiply
@@ -143,70 +146,125 @@ public class MathLong {
      */
     public MathLong mul(MathLong value) {
         int calculatedUnits = calcMaximumUnits(value);
-        expand(calculatedUnits * UNIT_LENGTH);
-        value.expand(calculatedUnits * UNIT_LENGTH);
+        MathLong mul_one = new MathLong(this);
+        MathLong mul_two = new MathLong(value);
+        
+        mul_one.expand(calculatedUnits * UNIT_LENGTH);
+        mul_two.expand(calculatedUnits * UNIT_LENGTH);
         
         if (calculatedUnits == 1) {
-            setValue(new MathLong(Long.parseLong(longIntegerValue.substring(0, UNIT_LENGTH/2))*
-                                  Long.parseLong(value.longIntegerValue.substring(0, UNIT_LENGTH/2)))
+            mul_one.setValue(new MathLong(Long.parseLong(mul_one.longIntegerValue.substring(0, UNIT_LENGTH/2))*
+                                  Long.parseLong(mul_two.longIntegerValue.substring(0, UNIT_LENGTH/2)))
                     .pow(UNIT_LENGTH)
-                    .add(new MathLong(Long.parseLong(longIntegerValue.substring(UNIT_LENGTH/2, UNIT_LENGTH))*
-                                      Long.parseLong(value.longIntegerValue.substring(0, UNIT_LENGTH/2)))
-                        .add(new MathLong(Long.parseLong(longIntegerValue.substring(0, UNIT_LENGTH/2))*
-                                          Long.parseLong(value.longIntegerValue.substring(UNIT_LENGTH/2, UNIT_LENGTH))))
+                    .add(new MathLong(Long.parseLong(mul_one.longIntegerValue.substring(UNIT_LENGTH/2, UNIT_LENGTH))*
+                                      Long.parseLong(mul_two.longIntegerValue.substring(0, UNIT_LENGTH/2)))
+                        .add(new MathLong(Long.parseLong(mul_one.longIntegerValue.substring(0, UNIT_LENGTH/2))*
+                                          Long.parseLong(mul_two.longIntegerValue.substring(UNIT_LENGTH/2, UNIT_LENGTH))))
                         .pow(UNIT_LENGTH/2))
-                    .add(new MathLong(Long.parseLong(longIntegerValue.substring(UNIT_LENGTH/2, UNIT_LENGTH))*
-                                      Long.parseLong(value.longIntegerValue.substring(UNIT_LENGTH/2, UNIT_LENGTH))))
+                    .add(new MathLong(Long.parseLong(mul_one.longIntegerValue.substring(UNIT_LENGTH/2, UNIT_LENGTH))*
+                                      Long.parseLong(mul_two.longIntegerValue.substring(UNIT_LENGTH/2, UNIT_LENGTH))))
                     .toString());
         }
         else {
-            setValue(new MathLong(longIntegerValue.substring(0, longIntegerValue.length()/2))
-                    .mul(new MathLong(value.longIntegerValue.substring(0, value.longIntegerValue.length()/2)))
+            mul_one.setValue(new MathLong(mul_one.longIntegerValue.substring(0, mul_one.longIntegerValue.length()/2))
+                    .mul(new MathLong(mul_two.longIntegerValue.substring(0, mul_two.longIntegerValue.length()/2)))
                     .pow(calculatedUnits*UNIT_LENGTH)
-                    .add(new MathLong(longIntegerValue.substring(0, longIntegerValue.length()/2))
-                        .mul(new MathLong(value.longIntegerValue.substring(value.longIntegerValue.length()/2, value.longIntegerValue.length())))
-                        .add(new MathLong(longIntegerValue.substring(longIntegerValue.length()/2, longIntegerValue.length()))
-                            .mul(new MathLong(value.longIntegerValue.substring(0, value.longIntegerValue.length()/2))))
+                    .add(new MathLong(mul_one.longIntegerValue.substring(0, mul_one.longIntegerValue.length()/2))
+                        .mul(new MathLong(mul_two.longIntegerValue.substring(mul_two.longIntegerValue.length()/2, mul_two.longIntegerValue.length())))
+                        .add(new MathLong(mul_one.longIntegerValue.substring(mul_one.longIntegerValue.length()/2, mul_one.longIntegerValue.length()))
+                            .mul(new MathLong(mul_two.longIntegerValue.substring(0, mul_two.longIntegerValue.length()/2))))
                         .pow(calculatedUnits*UNIT_LENGTH/2))
-                    .add(new MathLong(longIntegerValue.substring(longIntegerValue.length()/2, longIntegerValue.length()))
-                        .mul(new MathLong(value.longIntegerValue.substring(value.longIntegerValue.length()/2, value.longIntegerValue.length()))))
+                    .add(new MathLong(mul_one.longIntegerValue.substring(mul_one.longIntegerValue.length()/2, mul_one.longIntegerValue.length()))
+                        .mul(new MathLong(mul_two.longIntegerValue.substring(mul_two.longIntegerValue.length()/2, mul_two.longIntegerValue.length()))))
                     .toString());
         }
         
-        shrink(); value.shrink();
-        return this;
+        mul_one.shrink();
+        return mul_one;
     }
     
     /**
-     * Subtracts given value to instances value. Result is store in current instance.
+     * Subtracts given value to instances value.
+     * @param value value to subtract
+     * @return instance with result of subtraction
+     */
+    public MathLong sub(long value) { return sub(new MathLong(value)); }
+    
+    /**
+     * Subtracts given value to instances value.
      * @param value value to subtract
      * @return instance with result of subtraction
      */
     public MathLong sub(String value) { return sub(new MathLong(value)); }
     
     /**
-     * Subtracts given value to instances value. Result is store in current instance.
+     * Subtracts given value to instances value.
      * @param value value to subtract
      * @return instance with result of subtraction
      */
     public MathLong sub(MathLong value) {
-        return this;
+        return dis(value);
     }
     
     /**
-     * Calculates a distance between given value and instances value. Result is store in current instance.
+     * Calculates a distance between given value and instances value.
+     * @param value value to calculate a distance to
+     * @return instance with distance value
+     */
+    public MathLong dis(long value) { return dis(new MathLong(value)); }
+    
+    /**
+     * Calculates a distance between given value and instances value.
      * @param value value to calculate a distance to
      * @return instance with distance value
      */
     public MathLong dis(String value) { return dis(new MathLong(value)); }
     
     /**
-     * Calculates a distance between given value and instances value. Result is store in current instance.
+     * Calculates a distance between given value and instances value.
      * @param value value to calculate a distance to
      * @return instance with distance value
      */
     public MathLong dis(MathLong value) {
-        return this;
+        if (equals(value)) return new MathLong(0);
+        
+        int calculatedUnits = calcMaximumUnits(value);
+        
+        MathLong dis_one, dis_two;
+
+        if (cmp(value) == 1) {
+            dis_one = new MathLong(this);
+            dis_two = new MathLong(value);
+        }
+        else {
+            dis_one = new MathLong(value);
+            dis_two = new MathLong(this);
+        }
+        
+        dis_one.expand(calculatedUnits * UNIT_LENGTH);
+        dis_two.expand(calculatedUnits * UNIT_LENGTH);
+        
+        long extraValue = 0;
+        
+        for (int i = calcUnits(dis_one.longIntegerValue.length()); i > 0; i--) {
+            
+            Long part_one = Long.parseLong(dis_one.longIntegerValue.substring((i-1)*UNIT_LENGTH, i*UNIT_LENGTH)) - extraValue;
+            Long part_two = Long.parseLong(dis_two.longIntegerValue.substring((i-1)*UNIT_LENGTH, i*UNIT_LENGTH));
+            
+            if (part_one < part_two) {
+                extraValue = 1;
+                part_one += UNIT_VALUE;
+            }
+            else {
+                extraValue = 0;
+            }
+
+            dis_one.longIntegerValue.delete((i-1)*UNIT_LENGTH, i*UNIT_LENGTH);
+            dis_one.longIntegerValue.insert((i-1)*UNIT_LENGTH, expand(Long.toString(part_one - part_two), UNIT_LENGTH));
+        }
+        
+        dis_one.shrink();
+        return dis_one;
     }
 
     /**
@@ -250,24 +308,26 @@ public class MathLong {
      */
     public int cmp(MathLong value) { 
         int calculatedUnits = calcMaximumUnits(value);
-        expand(calculatedUnits * UNIT_LENGTH);
-        value.expand(calculatedUnits * UNIT_LENGTH);
+        MathLong cmp_one = new MathLong(this);
+        MathLong cmp_two = new MathLong(value);
+        
+        cmp_one.expand(calculatedUnits * UNIT_LENGTH);
+        cmp_two.expand(calculatedUnits * UNIT_LENGTH);
         
         int result = 0;
-        if (longIntegerValue.equals(value.longIntegerValue)) return 0;
+        if (cmp_one.longIntegerValue.equals(cmp_two.longIntegerValue)) return 0;
         for (int i = 1; i <= calculatedUnits; i++)
-            if (Long.parseLong(longIntegerValue.substring((i-1)*UNIT_LENGTH, i*UNIT_LENGTH)) > 
-                Long.parseLong(value.longIntegerValue.substring((i-1)*UNIT_LENGTH, i*UNIT_LENGTH))) {
+            if (Long.parseLong(cmp_one.longIntegerValue.substring((i-1)*UNIT_LENGTH, i*UNIT_LENGTH)) > 
+                Long.parseLong(cmp_two.longIntegerValue.substring((i-1)*UNIT_LENGTH, i*UNIT_LENGTH))) {
                 result = 1;
                 break;
             }
-            else if (Long.parseLong(longIntegerValue.substring((i-1)*UNIT_LENGTH, i*UNIT_LENGTH)) < 
-                     Long.parseLong(value.longIntegerValue.substring((i-1)*UNIT_LENGTH, i*UNIT_LENGTH))) {
+            else if (Long.parseLong(cmp_one.longIntegerValue.substring((i-1)*UNIT_LENGTH, i*UNIT_LENGTH)) < 
+                     Long.parseLong(cmp_two.longIntegerValue.substring((i-1)*UNIT_LENGTH, i*UNIT_LENGTH))) {
                 result = -1;
                 break;
             }
 
-        shrink(); value.shrink();
         return result;
     }
     
